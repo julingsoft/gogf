@@ -3,19 +3,17 @@ package redisx
 import (
 	"context"
 	"fmt"
-	_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 	"github.com/gogf/gf/v2/database/gredis"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 )
 
-func New(typeName ...string) *gredis.Redis {
-	redisType := "default"
-	if len(typeName) > 0 {
-		redisType = typeName[0]
+func New(groups ...string) *gredis.Redis {
+	group := "default"
+	if len(groups) > 0 && groups[0] != "" {
+		group = groups[0]
 	}
-
-	return g.Redis(redisType)
+	return g.Redis(group)
 }
 
 func GetLock(ctx context.Context, key string, exp int64) (bool, error) {

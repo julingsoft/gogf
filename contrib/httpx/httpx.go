@@ -36,17 +36,18 @@ func (c *HttpClient) Get(ctx context.Context, url string) ([]byte, error) {
 	}
 	defer r.Close()
 
+	respBytes := r.ReadAll()
 	duration := time.Since(startTime).Milliseconds()
 	g.Log().Info(ctx, logx.LogData{
 		Method:   http.MethodGet,
 		Url:      url,
-		Response: r.ReadAllString(),
+		Response: string(respBytes),
 		Status:   r.Response.StatusCode,
 		Duration: duration,
 		LogTime:  time.Now(),
 	})
 
-	return r.ReadAll(), nil
+	return respBytes, nil
 }
 
 func (c *HttpClient) Post(ctx context.Context, url string, data string) ([]byte, error) {
@@ -59,16 +60,17 @@ func (c *HttpClient) Post(ctx context.Context, url string, data string) ([]byte,
 	}
 	defer r.Close()
 
+	respBytes := r.ReadAll()
 	duration := time.Since(startTime).Milliseconds()
 	g.Log().Info(ctx, logx.LogData{
 		Method:   http.MethodPost,
 		Url:      url,
 		Request:  data,
-		Response: r.ReadAllString(),
+		Response: string(respBytes),
 		Status:   r.Response.StatusCode,
 		Duration: duration,
 		LogTime:  time.Now(),
 	})
 
-	return r.ReadAll(), nil
+	return respBytes, nil
 }

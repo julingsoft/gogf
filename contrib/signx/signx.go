@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gogf/gf/v2/crypto/gmd5"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -13,10 +12,6 @@ import (
 )
 
 func GetSign(ctx context.Context, jsonStr, secret string, queryData ...map[string]interface{}) (string, error) {
-	if g.IsEmpty(jsonStr) {
-		return "", gerror.New("jsonStr is empty")
-	}
-
 	queryStr := MustGetQueryStr(queryData...)
 	signStr := secret + queryStr + jsonStr + secret
 	g.Log().Info(ctx, signStr, "signStr")
