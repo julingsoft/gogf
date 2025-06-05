@@ -1,7 +1,6 @@
 package dbx
 
 import (
-	"context"
 	"github.com/gogf/gf/v2/database/gdb"
 )
 
@@ -19,125 +18,125 @@ type (
 	}
 
 	// Service 是 IService 接口的一个泛型实现
-	Service[T any] struct {
+	Service[T, D any] struct {
 		model *gdb.Model
 	}
 )
 
 // IService 是一个通用的泛型接口，用于获取单个实体
 // 使用 [T any] 来定义一个泛型类型参数 T
-type IService[T any] interface {
-	Model(ctx context.Context) *gdb.Model
-	Create(ctx context.Context, entity *T) error
-	CreateBatch(ctx context.Context, entities []*T) error
-	InsertAndGetId(ctx context.Context, entity *T) (int64, error)
-	DeleteById(ctx context.Context, id any) error
-	DeleteByIds(ctx context.Context, ids []any) error
-	UpdateById(ctx context.Context, entity *T, id any) error
-	GetById(ctx context.Context, id any) (*T, error)
-	GetOne(ctx context.Context, where interface{}, args ...interface{}) (*T, error)
-	ListByIds(ctx context.Context, ids []any) ([]*T, error)
-	List(ctx context.Context, where interface{}, args ...interface{}) ([]*T, error)
-	Count(ctx context.Context, where interface{}, args ...interface{}) (int, error)
-	Page(ctx context.Context, req PageRequest, where interface{}, args ...interface{}) (*PageResult[T], error)
+type IService[T, D any] interface {
+	Model() *gdb.Model
+	Create(do *D) error
+	CreateBatch(dos []*D) error
+	InsertAndGetId(do *D) (int64, error)
+	DeleteById(id any) error
+	DeleteByIds(ids []any) error
+	UpdateById(do *D, id any) error
+	GetById(id any) (*T, error)
+	GetOne(where interface{}, args ...interface{}) (*T, error)
+	ListByIds(ids []any) ([]*T, error)
+	List(where interface{}, args ...interface{}) ([]*T, error)
+	Count(where interface{}, args ...interface{}) (int, error)
+	Page(req PageRequest, where interface{}, args ...interface{}) (*PageResult[T], error)
 }
 
 // New 创建并返回一个 Service 的泛型实例
-func New[T any](m *gdb.Model) *Service[T] {
-	return &Service[T]{
-		model: m,
+func New[T, D any](model *gdb.Model) *Service[T, D] {
+	return &Service[T, D]{
+		model: model,
 	}
 }
 
-func (s *Service[T]) Model(ctx context.Context) *gdb.Model {
-	return s.model.Ctx(ctx)
+func (s *Service[T, D]) Model() *gdb.Model {
+	return s.model
 }
 
-func (s *Service[T]) Create(ctx context.Context, entity *T) error {
-	if _, err := s.Model(ctx).Insert(entity); err != nil {
+func (s *Service[T, D]) Create(do *D) error {
+	if _, err := s.Model().Insert(do); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *Service[T]) CreateBatch(ctx context.Context, entities []*T) error {
-	if len(entities) == 0 {
+func (s *Service[T, D]) CreateBatch(dos []*D) error {
+	if len(dos) == 0 {
 		return nil
 	}
-	if _, err := s.Model(ctx).Insert(entities); err != nil {
+	if _, err := s.Model().Insert(dos); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *Service[T]) InsertAndGetId(ctx context.Context, entity *T) (int64, error) {
-	return s.Model(ctx).InsertAndGetId(entity)
+func (s *Service[T, D]) InsertAndGetId(do *D) (int64, error) {
+	return s.Model().InsertAndGetId(do)
 }
 
-func (s *Service[T]) DeleteById(ctx context.Context, id any) error {
-	if _, err := s.Model(ctx).WherePri(id).Delete(); err != nil {
+func (s *Service[T, D]) DeleteById(id any) error {
+	if _, err := s.Model().WherePri(id).Delete(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *Service[T]) DeleteByIds(ctx context.Context, ids []any) error {
+func (s *Service[T, D]) DeleteByIds(ids []any) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	if _, err := s.Model(ctx).WherePri(ids).Delete(); err != nil {
+	if _, err := s.Model().WherePri(ids).Delete(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *Service[T]) UpdateById(ctx context.Context, entity *T, id any) error {
-	if _, err := s.Model(ctx).WherePri(id).Update(entity); err != nil {
+func (s *Service[T, D]) UpdateById(do *D, id any) error {
+	if _, err := s.Model().WherePri(id).Update(do); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *Service[T]) GetById(ctx context.Context, id any) (entity *T, err error) {
-	err = s.Model(ctx).WherePri(id).Scan(&entity)
+func (s *Service[T, D]) GetById(id any) (entity *T, err error) {
+	err = s.Model().WherePri(id).Scan(&entity)
 	if err != nil {
 		return nil, err
 	}
 	return entity, nil
 }
 
-func (s *Service[T]) GetOne(ctx context.Context, where interface{}, args ...interface{}) (entity *T, err error) {
-	err = s.Model(ctx).Where(where, args).Scan(&entity)
+func (s *Service[T, D]) GetOne(where interface{}, args ...interface{}) (entity *T, err error) {
+	err = s.Model().Where(where, args...).Scan(&entity)
 	if err != nil {
 		return nil, err
 	}
 	return entity, nil
 }
 
-func (s *Service[T]) ListByIds(ctx context.Context, ids []any) (entities []*T, err error) {
+func (s *Service[T, D]) ListByIds(ids []any) (entities []*T, err error) {
 	if len(ids) == 0 {
 		return entities, nil
 	}
-	err = s.Model(ctx).WherePri(ids).Scan(&entities)
+	err = s.Model().WherePri(ids).Scan(&entities)
 	if err != nil {
 		return nil, err
 	}
 	return entities, nil
 }
 
-func (s *Service[T]) List(ctx context.Context, where interface{}, args ...interface{}) (entities []*T, err error) {
-	err = s.Model(ctx).Where(where, args).Scan(&entities)
+func (s *Service[T, D]) List(where interface{}, args ...interface{}) (entities []*T, err error) {
+	err = s.Model().Where(where, args...).Scan(&entities)
 	if err != nil {
 		return nil, err
 	}
 	return entities, nil
 }
 
-func (s *Service[T]) Count(ctx context.Context, where interface{}, args ...interface{}) (int, error) {
-	return s.Model(ctx).Count(where, args)
+func (s *Service[T, D]) Count(where interface{}, args ...interface{}) (int, error) {
+	return s.Model().Where(where, args...).Count()
 }
 
-func (s *Service[T]) Page(ctx context.Context, req PageRequest, where interface{}, args ...interface{}) (result *PageResult[T], err error) {
+func (s *Service[T, D]) Page(req PageRequest, where interface{}, args ...interface{}) (result *PageResult[T], err error) {
 	if req.PageNum <= 0 {
 		req.PageNum = 1
 	}
@@ -153,7 +152,7 @@ func (s *Service[T]) Page(ctx context.Context, req PageRequest, where interface{
 		records []*T
 	)
 
-	total, err = s.Count(ctx, where, args)
+	total, err = s.Count(where, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +162,7 @@ func (s *Service[T]) Page(ctx context.Context, req PageRequest, where interface{
 	}
 
 	offset := (req.PageNum - 1) * req.PageSize
-	err = s.Model(ctx).Where(where, args).Offset(offset).Limit(req.PageSize).Scan(&records)
+	err = s.Model().Where(where, args...).Offset(offset).Limit(req.PageSize).Scan(&records)
 	if err != nil {
 		return nil, err
 	}
