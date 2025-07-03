@@ -9,9 +9,9 @@ import (
 )
 
 func DecodeString(s string) (string, error) {
-	// 分离 Base64 头部信息 (例如：'data:image/png;base64,')
 	var base64Data string
 	if strings.Contains(s, ",") {
+		// 分离 Base64 头部信息 (例如：'data:image/png;base64,')
 		parts := strings.SplitN(s, ",", 2)
 		base64Data = parts[1]
 	} else {
@@ -19,7 +19,7 @@ func DecodeString(s string) (string, error) {
 	}
 
 	// 解码 Base64 字符串
-	imgBytes, err := base64.StdEncoding.DecodeString(base64Data)
+	bytes, err := base64.StdEncoding.DecodeString(base64Data)
 	if err != nil {
 		return "", fmt.Errorf("解码 Base64 字符串失败: %w", err)
 	}
@@ -32,7 +32,7 @@ func DecodeString(s string) (string, error) {
 	}
 	defer file.Close()
 
-	_, err = file.Write(imgBytes)
+	_, err = file.Write(bytes)
 	if err != nil {
 		return "", fmt.Errorf("写入文件失败: %w", err)
 	}

@@ -67,6 +67,8 @@ func GetAllColumns(ctx context.Context, table string) []map[string]string {
 			"：":  ":",
 			"，":  ":",
 			",":  ":",
+			"(":  ":",
+			"（":  ":",
 			" ":  ":",
 			"\t": ":",
 		})
@@ -89,6 +91,19 @@ func GetAllColumns(ctx context.Context, table string) []map[string]string {
 	}
 
 	return allColumns
+}
+
+func GetPriKey(ctx context.Context, table string) string {
+	keyColumns := GetKeyColumns(ctx, table)
+
+	var priKey = "id"
+	for _, fieldInfo := range keyColumns {
+		if gstr.InArray([]string{"PRI"}, fieldInfo["Key"]) {
+			priKey = fieldInfo["Name"]
+		}
+	}
+
+	return priKey
 }
 
 func GetKeyColumns(ctx context.Context, table string) []map[string]string {

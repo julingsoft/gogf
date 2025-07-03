@@ -1,22 +1,18 @@
 package signx
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/gogf/gf/v2/crypto/gmd5"
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
 	"sort"
 )
 
-func GetSign(ctx context.Context, jsonStr, secret string, queryData ...map[string]interface{}) (string, error) {
+func GetSign(jsonStr, secret string, queryData ...map[string]interface{}) (string, error) {
 	queryStr := MustGetQueryStr(queryData...)
-	signStr := secret + queryStr + jsonStr + secret
-	g.Log().Info(ctx, signStr, "signStr")
-
-	return gstr.ToUpper(gmd5.MustEncryptString(signStr)), nil
+	signStr := gmd5.MustEncryptString(secret + queryStr + jsonStr + secret)
+	return gstr.ToUpper(signStr), nil
 }
 
 func MustGetQueryStr(queryData ...map[string]interface{}) (queryStr string) {

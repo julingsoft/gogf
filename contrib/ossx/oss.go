@@ -4,21 +4,21 @@ import (
 	"context"
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/credentials"
+	"github.com/gogf/gf/v2/frame/g"
 	"io"
-	"log"
 )
 
-type OSS struct {
-	client *oss.Client
-	config *Config
+type Config struct {
+	Endpoint        string `json:"endpoint"`
+	AccessKeyId     string `json:"accessKeyId"`
+	AccessKeySecret string `json:"accessKeySecret"`
+	RegionName      string `json:"regionName"`
+	BucketName      string `json:"bucketName"`
 }
 
-type Config struct {
-	Endpoint        string
-	AccessKeyId     string
-	AccessKeySecret string
-	RegionName      string
-	BucketName      string
+type OSS struct {
+	config *Config
+	client *oss.Client
 }
 
 func New(config *Config) *OSS {
@@ -26,12 +26,15 @@ func New(config *Config) *OSS {
 	cfg := oss.LoadDefaultConfig().
 		WithCredentialsProvider(provider).
 		WithRegion(config.RegionName)
-	client := oss.NewClient(cfg)
 
 	return &OSS{
-		client: client,
 		config: config,
+		client: oss.NewClient(cfg),
 	}
+}
+
+func (o *OSS) Client() *oss.Client {
+	return o.client
 }
 
 func (o *OSS) PutObject(ctx context.Context, objectName string, body io.Reader) (*oss.PutObjectResult, error) {
@@ -43,7 +46,7 @@ func (o *OSS) PutObject(ctx context.Context, objectName string, body io.Reader) 
 		Acl:          oss.ObjectACLPrivate,         // 指定对象的访问权限为私有访问
 	}
 
-	return o.client.PutObject(ctx, putRequest)
+	return o.Client().PutObject(ctx, putRequest)
 }
 
 func (o *OSS) PutObjectFromFile(ctx context.Context, objectName string, filePath string) (*oss.PutObjectResult, error) {
@@ -54,7 +57,7 @@ func (o *OSS) PutObjectFromFile(ctx context.Context, objectName string, filePath
 		Acl:          oss.ObjectACLPrivate,         // 指定对象的访问权限为私有访问
 	}
 
-	return o.client.PutObjectFromFile(ctx, putRequest, filePath)
+	return o.Client().PutObjectFromFile(ctx, putRequest, filePath)
 }
 
 func (o *OSS) GetObject(ctx context.Context, objectName string) (*oss.GetObjectResult, error) {
@@ -63,20 +66,20 @@ func (o *OSS) GetObject(ctx context.Context, objectName string) (*oss.GetObjectR
 		Key:    oss.Ptr(objectName),          // 对象名称
 	}
 
-	return o.client.GetObject(ctx, getRequest)
+	return o.Client().GetObject(ctx, getRequest)
 }
 
 func (o *OSS) MustGetObject(ctx context.Context, objectName string) string {
 	result, err := o.GetObject(ctx, objectName)
 	if err != nil {
-		log.Println(ctx, err, "[ossx] GetObject", objectName)
+		g.Log().Error(ctx, err, "[ossx] GetObject", objectName)
 		return ""
 	}
 	defer result.Body.Close()
 
 	data, err := io.ReadAll(result.Body)
 	if err != nil {
-		log.Println(ctx, err, "[ossx] ReadAll", objectName)
+		g.Log().Error(ctx, err, "[ossx] ReadAll", objectName)
 		return ""
 	}
 

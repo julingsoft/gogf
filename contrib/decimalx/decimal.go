@@ -21,16 +21,16 @@ func FloatToInt(f float64, p int64) int64 {
 	return FloatToDecimal(f).Mul(IntToDecimal(p)).IntPart()
 }
 
-// YuanToFen 元转分
+// Yuan2Cent 元转分
 // yuan: 以元为单位的浮点数
-func YuanToFen(yuan float64) int64 {
+func Yuan2Cent(yuan float64) int64 {
 	return FloatToInt(yuan, 100)
 }
 
-// FenToYuan 分转元
+// Cent2Yuan 分转元
 // fen: 以分为单位的整数
-func FenToYuan(fen int64) float64 {
-	decimalFen := IntToDecimal(fen)
+func Cent2Yuan(cent int64) float64 {
+	decimalFen := IntToDecimal(cent)
 	decimalYuan := decimalFen.Div(IntToDecimal(100))
 	return decimalYuan.InexactFloat64()
 }

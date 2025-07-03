@@ -8,7 +8,7 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	cache := New("cache")
+	cache := New()
 
 	cacheKey := "haha"
 	cacheVal := "world."

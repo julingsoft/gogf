@@ -1,16 +1,14 @@
 package guidx
 
 import (
-	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/sony/sonyflake"
+	"github.com/sony/sonyflake/v2"
+	"log"
+	"time"
 )
 
-func New() (uint64, error) {
+func New() (int64, error) {
 	st := sonyflake.Settings{
-		StartTime: gtime.New("2025-01-01").Time,
-		MachineID: func() (uint16, error) {
-			return MachineID()
-		},
+		TimeUnit: time.Millisecond,
 	}
 
 	s, err := sonyflake.New(st)
@@ -19,4 +17,12 @@ func New() (uint64, error) {
 	}
 
 	return s.NextID()
+}
+
+func NextID() int64 {
+	id, err := New()
+	if err != nil {
+		log.Fatalf("failed to generate id: %v", err)
+	}
+	return id
 }
